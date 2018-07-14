@@ -26,6 +26,9 @@ net.createServer(function (socket) {
                         httpResponseContainer.contentLength = fs.statSync(filePath).size;
                         socket.write(httpResponseContainer.toString());
                     }
+                    if(socket.destroyed) {
+                       return readStream.emit('end');
+                    }
                     socket.write(chunk);
                 }
             );
@@ -46,7 +49,11 @@ net.createServer(function (socket) {
 
     socket.on('error', function (err) {
         console.log(err);
-    })
+    });
+    socket.setTimeout(3000);
+    socket.on('timeout', function () {
+        socket.end();
+    });
 }).listen(PORT);
 
 
